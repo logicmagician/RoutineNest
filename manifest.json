@@ -1,0 +1,68 @@
+{
+    "name": "RoutineNest - Personal Productivity",
+    "short_name": "RoutineNest",
+    "description": "Free offline-first personal productivity app for daily routines, food budgeting, and habit tracking",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#007AFF",
+    "background_color": "#ffffff",
+    "screenshots": [
+      {
+        "src": "images/icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "images/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ],
+    "icons": [
+      {
+        "src": "images/icon-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "images/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ],
+    "categories": ["productivity"],
+    "shortcuts": [
+      {
+        "name": "View Daily Routine",
+        "short_name": "Routine",
+        "description": "Check today's tasks",
+        "url": "./index.html?page=routine",
+        "icons": [
+          {
+            "src": "images/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+          }
+        ]
+      },
+      {
+        "name": "Track Food Budget",
+        "short_name": "Budget",
+        "description": "Log expenses and budget",
+        "url": "./index.html?page=budget",
+        "icons": [
+          {
+            "src": "images/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+          }
+        ]
+      }
+    ]
+  }

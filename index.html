@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RoutineNest - Free offline personal productivity app">
+  <title>RoutineNest</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation Header -->
+  <header class="navbar">
+    <nav class="nav-container">
+      <button id="nav-home" class="nav-button active" data-page="home" onclick="router.show('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button id="nav-routine" class="nav-button" data-page="routine" onclick="router.show('routine')">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">Routine</span>
+      </button>
+      <button id="nav-budget" class="nav-button" data-page="budget" onclick="router.show('budget')">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Budget</span>
+      </button>
+      <button id="nav-progress" class="nav-button" data-page="progress" onclick="router.show('progress')">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Progress</span>
+      </button>
+      <button id="nav-reports" class="nav-button" data-page="reports" onclick="router.show('reports')">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Reports</span>
+      </button>
+      <button id="nav-settings" class="nav-button" data-page="settings" onclick="router.show('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main id="app" class="app-container">
+    <!-- Page 1: Home Dashboard -->
+    <section id="page-home" class="page active">
+      <div class="page-header">
+        <h1>Home Dashboard</h1>
+        <p class="page-date" id="today-date"></p>
+      </div>
+
+      <div class="dashboard-cards">
+        <!-- Next Task Card -->
+        <div class="card">
+          <h2>Next Task</h2>
+          <div class="card-content" id="home-next-task">
+            <p class="task-title">No tasks scheduled</p>
+          </div>
+        </div>
+
+        <!-- Pending Tasks Card -->
+        <div class="card">
+          <h2>Pending Today</h2>
+          <div class="card-content">
+            <p class="big-number" id="home-pending-count">0</p>
+            <p class="card-label">tasks</p>
+          </div>
+        </div>
+
+        <!-- Budget Card -->
+        <div class="card">
+          <h2>Budget Today</h2>
+          <div class="card-content">
+            <p><span class="budget-spent" id="home-spent">৳0</span> <span class="budget-limit" id="home-limit">/ ৳1000</span></p>
+            <div class="budget-bar">
+              <div class="budget-progress" id="home-budget-bar" style="width: 0%"></div>
+            </div>
+            <p class="budget-percent"><span id="home-percent">0</span>%</p>
+          </div>
+        </div>
+
+        <!-- Completed Card -->
+        <div class="card">
+          <h2>Completed Today</h2>
+          <div class="card-content">
+            <p class="big-number" id="home-completed-count">0</p>
+            <p class="card-label">task</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <button class="btn btn-primary" onclick="router.show('routine')">
+          View Today's Routine →
+        </button>
+      </div>
+    </section>
+
+    <!-- Page 2: Daily Routine -->
+    <section id="page-routine" class="page">
+      <div class="page-header">
+        <h1>Daily Routine</h1>
+        <p class="page-subtitle">Today's tasks in order</p>
+      </div>
+
+      <div class="section">
+        <button class="btn btn-primary" onclick="openAddTaskForm()">+ Add New Task</button>
+      </div>
+
+      <div class="task-list" id="task-list">
+        <!-- Tasks will be rendered here by JavaScript -->
+        <p class="empty-state">No tasks yet. Click "+ Add New Task" to create one.</p>
+      </div>
+    </section>
+
+    <!-- Page 3: Food Budget -->
+    <section id="page-budget" class="page">
+      <div class="page-header">
+        <h1>Food Budget</h1>
+        <p class="page-subtitle">Track your spending</p>
+      </div>
+
+      <!-- Budget Summary -->
+      <div class="budget-summary">
+        <div class="budget-stat">
+          <label>Daily Budget</label>
+          <p class="big-number"><span id="budget-daily-spent">৳0</span> <span class="currency-sub">/ <span id="budget-daily-limit">৳1000</span></span></p>
+          <p class="stat-percent"><span id="budget-daily-percent">0</span>%</p>
+        </div>
+      </div>
+
+      <!-- Budget Bar -->
+      <div class="budget-bar-large">
+        <div class="budget-progress" id="budget-bar" style="width: 0%"></div>
+      </div>
+
+      <div class="section">
+        <button class="btn btn-primary" onclick="openAddExpenseForm()">+ Add Expense</button>
+      </div>
+
+      <!-- Expense List -->
+      <h2>Today's Expenses</h2>
+      <div class="expense-list" id="expense-list">
+        <!-- Expenses will be rendered here by JavaScript -->
+        <p class="empty-state">No expenses logged. Click "+ Add Expense" to start tracking.</p>
+      </div>
+    </section>
+
+    <!-- Page 4: Progress -->
+    <section id="page-progress" class="page">
+      <div class="page-header">
+        <h1>Progress</h1>
+        <p class="page-subtitle">Your performance over time</p>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-box">
+          <p class="stat-label">Today's Completion</p>
+          <p class="big-number" id="progress-completion">0%</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Total Tasks</p>
+          <p class="big-number" id="progress-total">0</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Completed</p>
+          <p class="big-number" id="progress-completed">0</p>
+        </div>
+        <div class="stat-box">
+          <p class="stat-label">Pending</p>
+          <p class="big-number" id="progress-pending">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page 5: Weekly Reports -->
+    <section id="page-reports" class="page">
+      <div class="page-header">
+        <h1>Weekly Reports</h1>
+        <p class="page-subtitle" id="report-week-range">This week's performance</p>
+      </div>
+
+      <!-- Week Navigation -->
+      <div class="week-nav">
+        <button class="btn btn-secondary" onclick="goToPreviousWeek()">← Previous</button>
+        <span id="week-display" style="flex: 1; text-align: center; font-weight: bold;">Week of Oct 21</span>
+        <button class="btn btn-secondary" onclick="goToNextWeek()">Next →</button>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="report-summary">
+        <div class="report-card">
+          <p class="report-label">Tasks Completed</p>
+          <p class="report-number"><span id="report-completed">0</span> / <span id="report-total">0</span></p>
+          <p class="report-percent"><span id="report-completion-pct">0</span>%</p>
+        </div>
+        <div class="report-card">
+          <p class="report-label">Total Spent</p>
+          <p class="report-number">৳<span id="report-spent">0</span></p>
+          <p class="report-percent" id="report-budget-status">Safe</p>
+        </div>
+        <div class="report-card">
+          <p class="report-label">Average Daily</p>
+          <p class="report-number">৳<span id="report-daily-avg">0</span></p>
+          <p class="report-percent"><span id="report-daily-budget">/ ৳1000</span></p>
+        </div>
+      </div>
+
+      <!-- Daily Breakdown -->
+      <div class="report-section">
+        <h2>Daily Breakdown</h2>
+        <div class="daily-bars" id="daily-bars">
+          <!-- Daily bars will be rendered here -->
+        </div>
+      </div>
+
+      <!-- Tasks Summary -->
+      <div class="report-section">
+        <h2>Task Summary</h2>
+        <div class="tasks-summary">
+          <div class="task-stat">
+            <span class="stat-icon">✅</span>
+            <span class="stat-text">Completed: <strong id="report-tasks-completed">0</strong></span>
+          </div>
+          <div class="task-stat">
+            <span class="stat-icon">⏳</span>
+            <span class="stat-text">Pending: <strong id="report-tasks-pending">0</strong></span>
+          </div>
+          <div class="task-stat">
+            <span class="stat-icon">⏭️</span>
+            <span class="stat-text">Skipped: <strong id="report-tasks-skipped">0</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense Breakdown -->
+      <div class="report-section">
+        <h2>Expense Breakdown by Category</h2>
+        <div class="expense-breakdown" id="expense-breakdown">
+          <!-- Expense categories will be rendered here -->
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="report-section">
+        <h2>Insights</h2>
+        <div class="insights-list" id="insights-list">
+          <!-- Insights will be rendered here -->
+        </div>
+      </div>
+
+      <!-- Export -->
+      <div class="section">
+        <button class="btn btn-secondary" onclick="exportWeeklyReport()">📥 Export Report</button>
+      </div>
+    </section>
+
+    <!-- Page 6: Settings -->
+    <section id="page-settings" class="page">
+      <div class="page-header">
+        <h1>Settings</h1>
+        <p class="page-subtitle">Customize your experience</p>
+      </div>
+
+      <div class="settings-section">
+        <h2>Display</h2>
+        <div class="setting-item">
+          <label for="theme-toggle">Dark Mode</label>
+          <input type="checkbox" id="theme-toggle" class="toggle">
+        </div>
+        <div class="setting-item">
+          <label for="daily-budget">Daily Budget (৳)</label>
+          <input type="number" id="daily-budget" value="1000" min="0" onchange="saveBudgetSetting()">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Notifications</h2>
+        <div class="setting-item">
+          <label for="notifications-toggle">Enable Notifications</label>
+          <input type="checkbox" id="notifications-toggle" class="toggle" checked>
+        </div>
+        <div class="setting-item">
+          <label for="quiet-hours-start">Quiet Hours Start</label>
+          <input type="time" id="quiet-hours-start" value="22:00">
+        </div>
+        <div class="setting-item">
+          <label for="quiet-hours-end">Quiet Hours End</label>
+          <input type="time" id="quiet-hours-end" value="08:00">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Data Management</h2>
+        <button class="btn btn-secondary" onclick="exportData()">📥 Export Backup</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📤 Import Backup</button>
+        <input type="file" id="import-file" accept=".json" style="display:none;" onchange="importData(event)">
+        <button class="btn btn-danger" onclick="if(confirm('Delete all data? This cannot be undone.')) { deleteAllData(); }">🗑️ Delete All Data</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Adding/Editing Tasks -->
+  <div id="task-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="task-modal-title">Add New Task</h2>
+        <button class="close-btn" onclick="closeTaskModal()">&times;</button>
+      </div>
+      <form id="task-form" onsubmit="submitTaskForm(event)">
+        <div class="form-group">
+          <label for="task-title">Task Title *</label>
+          <input type="text" id="task-title" required placeholder="e.g., Morning run">
+        </div>
+        <div class="form-group">
+          <label for="task-time">Time *</label>
+          <input type="time" id="task-time" required>
+        </div>
+        <div class="form-group">
+          <label for="task-duration">Duration (minutes)</label>
+          <input type="number" id="task-duration" value="30" min="1">
+        </div>
+        <div class="form-group">
+          <label for="task-category">Category</label>
+          <select id="task-category">
+            <option>Personal</option>
+            <option>Work</option>
+            <option>Health</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Task</button>
+        </div>
+        <input type="hidden" id="task-edit-id">
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Adding/Editing Expenses -->
+  <div id="expense-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="expense-modal-title">Add Expense</h2>
+        <button class="close-btn" onclick="closeExpenseModal()">&times;</button>
+      </div>
+      <form id="expense-form" onsubmit="submitExpenseForm(event)">
+        <div class="form-group">
+          <label for="expense-amount">Amount (৳) *</label>
+          <input type="number" id="expense-amount" required min="0.01" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="expense-category">Category *</label>
+          <select id="expense-category" required>
+            <option value="">Select category</option>
+            <option value="breakfast">🌅 Breakfast</option>
+            <option value="lunch">🍽️ Lunch</option>
+            <option value="dinner">🌙 Dinner</option>
+            <option value="snack">🍪 Snack</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="expense-description">Description</label>
+          <input type="text" id="expense-description" placeholder="e.g., Rice & Vegetables">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Expense</button>
+        </div>
+        <input type="hidden" id="expense-edit-id">
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts (loaded at end for performance) -->
+  <script src="js/state.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/models/Task.js"></script>
+  <script src="js/models/Expense.js"></script>
+  <script src="js/models/Meal.js"></script>
+  <script src="js/services/taskService.js"></script>
+  <script src="js/services/expenseService.js"></script>
+  <script src="js/services/notificationService.js"></script>
+  <script src="js/services/settingsService.js"></script>
+  <script src="js/ui/modal.js"></script>
+  <script src="js/ui/toast.js"></script>
+  <script src="js/ui/renderer.js"></script>
+  <script src="js/ui/formHandlers.js"></script>
+
+  <!-- Main App with Missing Functions -->
+  <script>
+    /**
+     * Setup Navigation - Wire up nav button clicks
+     */
+    function setupNavigation() {
+      document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const page = btn.getAttribute('data-page');
+          router.show(page);
+        });
+      });
+    }
+
+    /**
+     * Setup File Import
+     */
+    function setupFileImport() {
+      const importFile = document.getElementById('import-file');
+      if (importFile) {
+        importFile.addEventListener('change', importData);
+      }
+    }
+
+    /**
+     * Update today's date
+     */
+    function updateTodayDate() {
+      const dateEl = document.getElementById('today-date');
+      if (dateEl) {
+        const today = new Date();
+        const options = { weekday: 'long', month: 'long', day: 'numeric' };
+        dateEl.textContent = today.toLocaleDateString('en-US', options);
+      }
+    }
+
+    /**
+     * Render tasks for Daily Routine page
+     */
+    function renderTasks() {
+      const taskList = document.getElementById('task-list');
+      if (!taskList) return;
+
+      const tasks = appState.tasks || [];
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<p class="empty-state">No tasks yet. Click "+ Add New Task" to create one.</p>';
+        return;
+      }
+
+      taskList.innerHTML = tasks.map(task => `
+        <div class="task-card ${task.status}">
+          <div class="task-header">
+            <h3>${task.title}</h3>
+            <span class="task-priority ${task.priority}">${task.priority}</span>
+          </div>
+          <p class="task-time">${task.scheduledTime || 'No time'} • ${task.durationMinutes || 30} min</p>
+          <p class="task-category">${task.category || 'Personal'}</p>
+          <div class="task-actions">
+            ${task.status !== 'completed' ? `<button class="btn btn-small btn-success" onclick="completeTask('${task.id}')">Complete</button>` : ''}
+            ${task.status === 'pending' ? `<button class="btn btn-small btn-warning" onclick="skipTask('${task.id}')">Skip</button>` : ''}
+            <button class="btn btn-small btn-secondary" onclick="editTask('${task.id}')">Edit</button>
+            <button class="btn btn-small btn-danger" onclick="deleteTask('${task.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /**
+     * Render expenses for Budget page
+     */
+    function renderExpenses() {
+      const expenseList = document.getElementById('expense-list');
+      if (!expenseList) return;
+
+      const expenses = appState.expenses || [];
+      if (expenses.length === 0) {
+        expenseList.innerHTML = '<p class="empty-state">No expenses logged. Click "+ Add Expense" to start tracking.</p>';
+        return;
+      }
+
+      expenseList.innerHTML = expenses.map(expense => {
+        const categoryLabel = {
+          breakfast: '🌅 Breakfast',
+          lunch: '🍽️ Lunch',
+          dinner: '🌙 Dinner',
+          snack: '🍪 Snack'
+        }[expense.mealCategory] || expense.mealCategory;
+
+        return `
+        <div class="expense-item">
+          <div class="expense-info">
+            <p class="expense-name">${expense.description || 'Expense'}</p>
+            <p class="expense-category">${categoryLabel}</p>
+          </div>
+          <div class="expense-actions">
+            <p class="expense-amount">৳${expense.amount.toFixed(2)}</p>
+            <button class="btn btn-tiny" onclick="editExpense('${expense.id}')">Edit</button>
+            <button class="btn btn-tiny btn-danger" onclick="deleteExpense('${expense.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    /**
+     * Update home page stats
+     */
+    function updateHomeStats() {
+      const tasks = appState.tasks || [];
+      const expenses = appState.expenses || [];
+      
+      const completed = tasks.filter(t => t.status === 'completed').length;
+      const pending = tasks.filter(t => t.status === 'pending').length;
+      const nextTask = tasks.find(t => t.status === 'pending');
+      
+      const budget = appState.settings?.dailyBudget || 1000;
+      const spent = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+      const percent = Math.round((spent / budget) * 100);
+
+      // Update elements
+      const nextTaskDiv = document.getElementById('home-next-task');
+      if (nextTask && nextTaskDiv) {
+        nextTaskDiv.innerHTML = `
+          <p class="task-title">${nextTask.title}</p>
+          <p class="task-time">${nextTask.scheduledTime || 'No time'}</p>
+          <p class="task-duration">${nextTask.durationMinutes || 30} minutes</p>
+        `;
+      }
+
+      const pendingEl = document.getElementById('home-pending-count');
+      if (pendingEl) pendingEl.textContent = pending;
+
+      const completedEl = document.getElementById('home-completed-count');
+      if (completedEl) completedEl.textContent = completed;
+
+      const spentEl = document.getElementById('home-spent');
+      if (spentEl) spentEl.textContent = `৳${spent.toFixed(2)}`;
+
+      const limitEl = document.getElementById('home-limit');
+      if (limitEl) limitEl.textContent = `/ ৳${budget}`;
+
+      const percentEl = document.getElementById('home-percent');
+      if (percentEl) percentEl.textContent = percent;
+
+      const barEl = document.getElementById('home-budget-bar');
+      if (barEl) barEl.style.width = Math.min(percent, 100) + '%';
+    }
+
+    /**
+     * Update budget page stats
+     */
+    function updateBudgetStats() {
+      const expenses = appState.expenses || [];
+      const budget = appState.settings?.dailyBudget || 1000;
+      const spent = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+      const percent = Math.round((spent / budget) * 100);
+
+      const spentEl = document.getElementById('budget-daily-spent');
+      if (spentEl) spentEl.textContent = `৳${spent.toFixed(2)}`;
+
+      const limitEl = document.getElementById('budget-daily-limit');
+      if (limitEl) limitEl.textContent = `৳${budget}`;
+
+      const percentEl = document.getElementById('budget-daily-percent');
+      if (percentEl) percentEl.textContent = percent;
+
+      const barEl = document.getElementById('budget-bar');
+      if (barEl) barEl.style.width = Math.min(percent, 100) + '%';
+
+      renderExpenses();
+    }
+
+    /**
+     * Update progress page stats
+     */
+    function updateProgressStats() {
+      const tasks = appState.tasks || [];
+      const completed = tasks.filter(t => t.status === 'completed').length;
+      const pending = tasks.filter(t => t.status === 'pending').length;
+      const total = tasks.length;
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      document.getElementById('progress-completion').textContent = percent + '%';
+      document.getElementById('progress-total').textContent = total;
+      document.getElementById('progress-completed').textContent = completed;
+      document.getElementById('progress-pending').textContent = pending;
+    }
+
+    /**
+     * Open task modal for adding
+     */
+    function openAddTaskForm() {
+      document.getElementById('task-modal-title').textContent = 'Add New Task';
+      document.getElementById('task-form').reset();
+      document.getElementById('task-edit-id').value = '';
+      document.getElementById('task-modal').style.display = 'flex';
+    }
+
+    /**
+     * Edit task
+     */
+    function editTask(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      document.getElementById('task-modal-title').textContent = 'Edit Task';
+      document.getElementById('task-title').value = task.title;
+      document.getElementById('task-time').value = task.scheduledTime || '';
+      document.getElementById('task-duration').value = task.durationMinutes || 30;
+      document.getElementById('task-category').value = task.category || 'Personal';
+      document.getElementById('task-edit-id').value = taskId;
+      document.getElementById('task-modal').style.display = 'flex';
+    }
+
+    /**
+     * Close task modal
+     */
+    function closeTaskModal() {
+      document.getElementById('task-modal').style.display = 'none';
+    }
+
+    /**
+     * Submit task form
+     */
+    function submitTaskForm(event) {
+      event.preventDefault();
+
+      const taskId = document.getElementById('task-edit-id').value;
+      const taskData = {
+        title: document.getElementById('task-title').value,
+        scheduledTime: document.getElementById('task-time').value,
+        durationMinutes: parseInt(document.getElementById('task-duration').value) || 30,
+        category: document.getElementById('task-category').value,
+        scheduledDate: new Date().toISOString().split('T')[0],
+        priority: 'medium'
+      };
+
+      if (!taskData.title.trim()) {
+        showToast('Please enter a task title', 'error');
+        return;
+      }
+
+      if (taskId) {
+        // Edit
+        const task = appState.tasks.find(t => t.id === taskId);
+        if (task) {
+          task.title = taskData.title;
+          task.scheduledTime = taskData.scheduledTime;
+          task.durationMinutes = taskData.durationMinutes;
+          task.category = taskData.category;
+        }
+      } else {
+        // Add new - use object syntax for constructor
+        const newTask = new Task({
+          id: Date.now().toString(),
+          title: taskData.title,
+          scheduledTime: taskData.scheduledTime,
+          durationMinutes: taskData.durationMinutes,
+          category: taskData.category,
+          scheduledDate: taskData.scheduledDate,
+          priority: taskData.priority,
+          status: 'pending'
+        });
+        appState.tasks.push(newTask);
+      }
+
+      Storage.saveTasks(appState.tasks);
+      closeTaskModal();
+      renderTasks();
+      updateHomeStats();
+      updateProgressStats();
+      showToast(taskId ? 'Task updated!' : 'Task added!', 'success');
+    }
+
+    /**
+     * Complete task
+     */
+    function completeTask(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = 'completed';
+        task.completedAt = new Date().toISOString();
+        Storage.saveTasks(appState.tasks);
+        renderTasks();
+        updateHomeStats();
+        updateProgressStats();
+        showToast('Task completed!', 'success');
+      }
+    }
+
+    /**
+     * Skip task
+     */
+    function skipTask(taskId) {
+      const task = appState.tasks.find(t => t.id === taskId);
+      if (task) {
+        task.status = 'skipped';
+        Storage.saveTasks(appState.tasks);
+        renderTasks();
+        updateHomeStats();
+        showToast('Task skipped', 'info');
+      }
+    }
+
+    /**
+     * Delete task
+     */
+    function deleteTask(taskId) {
+      if (confirm('Delete this task?')) {
+        appState.tasks = appState.tasks.filter(t => t.id !== taskId);
+        Storage.saveTasks(appState.tasks);
+        renderTasks();
+        updateHomeStats();
+        updateProgressStats();
+        showToast('Task deleted', 'info');
+      }
+    }
+
+    /**
+     * Open expense modal for adding
+     */
+    function openAddExpenseForm() {
+      document.getElementById('expense-modal-title').textContent = 'Add Expense';
+      document.getElementById('expense-form').reset();
+      document.getElementById('expense-edit-id').value = '';
+      document.getElementById('expense-modal').style.display = 'flex';
+    }
+
+    /**
+     * Edit expense
+     */
+    function editExpense(expenseId) {
+      const expense = appState.expenses.find(e => e.id === expenseId);
+      if (!expense) return;
+
+      document.getElementById('expense-modal-title').textContent = 'Edit Expense';
+      document.getElementById('expense-amount').value = expense.amount;
+      document.getElementById('expense-category').value = expense.mealCategory || '';
+      document.getElementById('expense-description').value = expense.description || '';
+      document.getElementById('expense-edit-id').value = expenseId;
+      document.getElementById('expense-modal').style.display = 'flex';
+    }
+
+    /**
+     * Close expense modal
+     */
+    function closeExpenseModal() {
+      document.getElementById('expense-modal').style.display = 'none';
+    }
+
+    /**
+     * Submit expense form
+     */
+    function submitExpenseForm(event) {
+      event.preventDefault();
+
+      const expenseId = document.getElementById('expense-edit-id').value;
+      const amount = parseFloat(document.getElementById('expense-amount').value);
+      const mealCategory = document.getElementById('expense-category').value;
+      const description = document.getElementById('expense-description').value;
+
+      if (!amount || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
+      }
+
+      if (!mealCategory) {
+        showToast('Please select a category', 'error');
+        return;
+      }
+
+      if (expenseId) {
+        // Edit
+        const expense = appState.expenses.find(e => e.id === expenseId);
+        if (expense) {
+          expense.amount = amount;
+          expense.mealCategory = mealCategory;
+          expense.description = description;
+        }
+      } else {
+        // Add new - use object syntax for constructor
+        const newExpense = new Expense({
+          id: Date.now().toString(),
+          date: new Date().toISOString().split('T')[0],
+          amount: amount,
+          currency: 'BDT',
+          mealCategory: mealCategory,
+          description: description
+        });
+        appState.expenses.push(newExpense);
+      }
+
+      Storage.saveExpenses(appState.expenses);
+      closeExpenseModal();
+      updateBudgetStats();
+      updateHomeStats();
+      showToast(expenseId ? 'Expense updated!' : 'Expense added!', 'success');
+    }
+
+    /**
+     * Delete expense
+     */
+    function deleteExpense(expenseId) {
+      if (confirm('Delete this expense?')) {
+        appState.expenses = appState.expenses.filter(e => e.id !== expenseId);
+        Storage.saveExpenses(appState.expenses);
+        updateBudgetStats();
+        updateHomeStats();
+        showToast('Expense deleted', 'info');
+      }
+    }
+
+    /**
+     * Save budget setting
+     */
+    function saveBudgetSetting() {
+      const budget = parseInt(document.getElementById('daily-budget').value) || 1000;
+      appState.settings = appState.settings || {};
+      appState.settings.dailyBudget = budget;
+      Storage.saveSettings(appState.settings);
+      updateBudgetStats();
+      updateHomeStats();
+      showToast('Budget updated!', 'success');
+    }
+
+    /**
+     * Export data as JSON
+     */
+    function exportData() {
+      const backup = {
+        tasks: appState.tasks || [],
+        expenses: appState.expenses || [],
+        meals: appState.meals || [],
+        settings: appState.settings || {},
+        exportedAt: new Date().toISOString()
+      };
+
+      const dataStr = JSON.stringify(backup, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `routinenest-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Backup exported!', 'success');
+    }
+
+    /**
+     * Import data from JSON
+     */
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const backup = JSON.parse(e.target.result);
+          if (backup.tasks) appState.tasks = backup.tasks;
+          if (backup.expenses) appState.expenses = backup.expenses;
+          if (backup.meals) appState.meals = backup.meals;
+          if (backup.settings) appState.settings = backup.settings;
+
+          Storage.saveTasks(appState.tasks);
+          Storage.saveExpenses(appState.expenses);
+          Storage.saveMeals(appState.meals);
+          Storage.saveSettings(appState.settings);
+
+          // Refresh all views
+          renderTasks();
+          updateBudgetStats();
+          updateHomeStats();
+          updateProgressStats();
+
+          showToast('Data imported successfully!', 'success');
+        } catch (error) {
+          showToast('Error importing data: ' + error.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+
+      // Reset file input
+      event.target.value = '';
+    }
+
+    /**
+     * Delete all data
+     */
+    function deleteAllData() {
+      appState.tasks = [];
+      appState.expenses = [];
+      appState.meals = [];
+      appState.settings = {};
+
+      Storage.saveTasks([]);
+      Storage.saveExpenses([]);
+      Storage.saveMeals([]);
+      Storage.saveSettings({});
+
+      renderTasks();
+      updateBudgetStats();
+      updateHomeStats();
+      updateProgressStats();
+
+      showToast('All data deleted', 'info');
+    }
+
+    /**
+     * Show toast notification
+     */
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 6px;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    /**
+     * Initialize router
+     */
+    const app = {
+      init() {
+        // Initialize app state
+        if (!appState.tasks) {
+          appState.init();
+        }
+
+        // Load data from storage
+        appState.tasks = Storage.getTasks() || [];
+        appState.expenses = Storage.getExpenses() || [];
+        appState.meals = Storage.getMeals() || [];
+        appState.settings = Storage.getSettings() || { dailyBudget: 1000 };
+
+        // Setup UI
+        setupNavigation();
+        setupFileImport();
+        updateTodayDate();
+
+        // Initialize theme
+        const theme = localStorage.getItem('routineNest_theme') || 'light';
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+          themeToggle.checked = theme === 'dark';
+          themeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+              document.documentElement.style.colorScheme = 'dark';
+              localStorage.setItem('routineNest_theme', 'dark');
+            } else {
+              document.documentElement.style.colorScheme = 'light';
+              localStorage.setItem('routineNest_theme', 'light');
+            }
+          });
+          if (theme === 'dark') {
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        }
+
+        // Update budget input
+        const budgetInput = document.getElementById('daily-budget');
+        if (budgetInput) {
+          budgetInput.value = appState.settings.dailyBudget || 1000;
+        }
+
+        // Show home and render
+        router.show('home');
+      }
+    };
+
+    // ===== WEEKLY REPORTS FUNCTIONS =====
+
+    // Global variable to track current report week
+    let currentReportDate = new Date();
+
+    /**
+     * Get start of week (Monday) for a given date
+     */
+    function getWeekStart(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+      return new Date(d.setDate(diff));
+    }
+
+    /**
+     * Get end of week (Sunday) for a given date
+     */
+    function getWeekEnd(date) {
+      const start = getWeekStart(date);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      return end;
+    }
+
+    /**
+     * Format date as YYYY-MM-DD
+     */
+    function formatDateISO(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * Format date for display
+     */
+    function formatDateDisplay(date) {
+      const options = { month: 'short', day: 'numeric', year: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    /**
+     * Check if task was completed this week
+     */
+    function wasTaskCompletedThisWeek(task, weekStart, weekEnd) {
+      if (!task.completedAt) return false;
+      const completedDate = new Date(task.completedAt);
+      return completedDate >= weekStart && completedDate <= weekEnd;
+    }
+
+    /**
+     * Check if expense was this week
+     */
+    function isExpenseThisWeek(expense, weekStart, weekEnd) {
+      const expenseDate = new Date(expense.date);
+      return expenseDate >= weekStart && expenseDate <= weekEnd;
+    }
+
+    /**
+     * Calculate weekly statistics
+     */
+    function getWeeklyStats(weekStart, weekEnd) {
+      const tasks = appState.tasks || [];
+      const expenses = appState.expenses || [];
+
+      // Task stats
+      const completedThisWeek = tasks.filter(t => wasTaskCompletedThisWeek(t, weekStart, weekEnd)).length;
+      const pendingThisWeek = tasks.filter(t => 
+        !wasTaskCompletedThisWeek(t, weekStart, weekEnd) && 
+        t.scheduledDate >= formatDateISO(weekStart) && 
+        t.scheduledDate <= formatDateISO(weekEnd) && 
+        t.status !== 'skipped'
+      ).length;
+      const skippedThisWeek = tasks.filter(t => 
+        t.status === 'skipped' && 
+        t.scheduledDate >= formatDateISO(weekStart) && 
+        t.scheduledDate <= formatDateISO(weekEnd)
+      ).length;
+      const totalThisWeek = completedThisWeek + pendingThisWeek + skippedThisWeek;
+
+      // Expense stats
+      const expensesThisWeek = expenses.filter(e => isExpenseThisWeek(e, weekStart, weekEnd));
+      const totalSpent = expensesThisWeek.reduce((sum, e) => sum + (e.amount || 0), 0);
+
+      // Daily breakdown
+      const dailyData = {};
+      for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+        const dateStr = formatDateISO(new Date(d));
+        const dayExpenses = expensesThisWeek.filter(e => e.date === dateStr).reduce((sum, e) => sum + e.amount, 0);
+        const dayCompletedTasks = tasks.filter(t => {
+          if (!t.completedAt) return false;
+          return formatDateISO(new Date(t.completedAt)) === dateStr;
+        }).length;
+        dailyData[dateStr] = { expenses: dayExpenses, tasksCompleted: dayCompletedTasks };
+      }
+
+      // Expense breakdown by category
+      const categoryBreakdown = {};
+      expensesThisWeek.forEach(e => {
+        const cat = e.mealCategory || 'other';
+        if (!categoryBreakdown[cat]) {
+          categoryBreakdown[cat] = { amount: 0, count: 0 };
+        }
+        categoryBreakdown[cat].amount += e.amount;
+        categoryBreakdown[cat].count += 1;
+      });
+
+      return {
+        completedThisWeek,
+        pendingThisWeek,
+        skippedThisWeek,
+        totalThisWeek,
+        totalSpent,
+        expensesThisWeek,
+        dailyData,
+        categoryBreakdown,
+        weekStart,
+        weekEnd
+      };
+    }
+
+    /**
+     * Generate insights from weekly data
+     */
+    function generateInsights(stats) {
+      const insights = [];
+      const completionPct = stats.totalThisWeek > 0 ? Math.round((stats.completedThisWeek / stats.totalThisWeek) * 100) : 0;
+      const budget = appState.settings?.dailyBudget || 1000;
+      const weeklyBudget = budget * 7;
+
+      // Completion insight
+      if (completionPct >= 80) {
+        insights.push(`🎉 Excellent! You completed ${completionPct}% of your tasks this week.`);
+      } else if (completionPct >= 60) {
+        insights.push(`👍 Good progress! You completed ${completionPct}% of your tasks this week.`);
+      } else if (completionPct >= 40) {
+        insights.push(`⚠️ You completed ${completionPct}% of your tasks. Keep pushing!`);
+      } else if (stats.totalThisWeek > 0) {
+        insights.push(`💪 You completed ${completionPct}% of your tasks. Time to boost productivity!`);
+      } else {
+        insights.push(`📋 No tasks scheduled this week.`);
+      }
+
+      // Budget insight
+      if (stats.totalSpent === 0) {
+        insights.push(`💰 No expenses this week. Great savings!`);
+      } else if (stats.totalSpent > weeklyBudget) {
+        const overspent = Math.round(stats.totalSpent - weeklyBudget);
+        insights.push(`⚠️ You overspent by ৳${overspent} this week. Budget was ৳${weeklyBudget}.`);
+      } else {
+        const saved = Math.round(weeklyBudget - stats.totalSpent);
+        insights.push(`✅ You saved ৳${saved} this week. Budget was ৳${weeklyBudget}.`);
+      }
+
+      // Daily average
+      const dailyAvg = Math.round(stats.totalSpent / 7);
+      const dailyBudget = budget;
+      if (dailyAvg > dailyBudget) {
+        insights.push(`📊 Your daily average spending is ৳${dailyAvg}, above your ৳${dailyBudget} target.`);
+      } else if (dailyAvg > 0) {
+        insights.push(`📊 Your daily average spending is ৳${dailyAvg}, within your ৳${dailyBudget} target.`);
+      }
+
+      // Category insight
+      const categories = Object.entries(stats.categoryBreakdown);
+      if (categories.length > 0) {
+        const topCategory = categories.reduce((max, current) => 
+          current[1].amount > max[1].amount ? current : max
+        );
+        const categoryEmoji = {
+          breakfast: '🌅',
+          lunch: '🍽️',
+          dinner: '🌙',
+          snack: '🍪'
+        }[topCategory[0]] || '🍴';
+        insights.push(`${categoryEmoji} Your biggest spending was on ${topCategory[0]} (৳${topCategory[1].amount.toFixed(2)}).`);
+      }
+
+      return insights;
+    }
+
+    /**
+     * Render weekly report
+     */
+    function renderWeeklyReport() {
+      const weekStart = getWeekStart(currentReportDate);
+      const weekEnd = getWeekEnd(currentReportDate);
+      const stats = getWeeklyStats(weekStart, weekEnd);
+      const insights = generateInsights(stats);
+
+      // Update week display
+      const weekStartStr = formatDateDisplay(weekStart);
+      const weekEndStr = formatDateDisplay(weekEnd);
+      document.getElementById('report-week-range').textContent = `${weekStartStr} – ${weekEndStr}`;
+      document.getElementById('week-display').textContent = `${weekStartStr.split(',')[0]} – ${weekEndStr}`;
+
+      // Update summary cards
+      const completionPct = stats.totalThisWeek > 0 ? Math.round((stats.completedThisWeek / stats.totalThisWeek) * 100) : 0;
+      document.getElementById('report-completed').textContent = stats.completedThisWeek;
+      document.getElementById('report-total').textContent = stats.totalThisWeek;
+      document.getElementById('report-completion-pct').textContent = completionPct;
+      document.getElementById('report-spent').textContent = stats.totalSpent.toFixed(2);
+      document.getElementById('report-daily-avg').textContent = Math.round(stats.totalSpent / 7);
+      document.getElementById('report-daily-budget').textContent = `/ ৳${appState.settings?.dailyBudget || 1000}`;
+
+      // Budget status
+      const weeklyBudget = (appState.settings?.dailyBudget || 1000) * 7;
+      let budgetStatus = 'Safe';
+      if (stats.totalSpent > weeklyBudget * 1.2) {
+        budgetStatus = '🚨 Over';
+      } else if (stats.totalSpent > weeklyBudget) {
+        budgetStatus = '⚠️ Caution';
+      } else if (stats.totalSpent > weeklyBudget * 0.8) {
+        budgetStatus = '⚡ Alert';
+      }
+      document.getElementById('report-budget-status').textContent = budgetStatus;
+
+      // Daily bars
+      const dailyBarsHtml = [];
+      const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const dailyBudget = appState.settings?.dailyBudget || 1000;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        const dateStr = formatDateISO(d);
+        const dayData = stats.dailyData[dateStr] || { expenses: 0, tasksCompleted: 0 };
+        const barWidth = Math.min((dayData.expenses / dailyBudget) * 100, 100);
+        const barColor = barWidth > 100 ? '#ef4444' : barWidth > 80 ? '#f59e0b' : '#10b981';
+
+        dailyBarsHtml.push(`
+          <div class="daily-bar">
+            <div class="bar-label">${weekDays[i]}</div>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: ${barWidth}%; background: ${barColor};"></div>
+            </div>
+            <div class="bar-amount">৳${dayData.expenses.toFixed(0)}</div>
+            <div class="bar-tasks">${dayData.tasksCompleted} tasks</div>
+          </div>
+        `);
+      }
+      document.getElementById('daily-bars').innerHTML = dailyBarsHtml.join('');
+
+      // Task summary
+      document.getElementById('report-tasks-completed').textContent = stats.completedThisWeek;
+      document.getElementById('report-tasks-pending').textContent = stats.pendingThisWeek;
+      document.getElementById('report-tasks-skipped').textContent = stats.skippedThisWeek;
+
+      // Expense breakdown
+      const breakdownHtml = Object.entries(stats.categoryBreakdown).map(([cat, data]) => {
+        const emoji = {
+          breakfast: '🌅',
+          lunch: '🍽️',
+          dinner: '🌙',
+          snack: '🍪'
+        }[cat] || '🍴';
+        return `
+          <div class="breakdown-item">
+            <span class="breakdown-label">${emoji} ${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+            <span class="breakdown-amount">৳${data.amount.toFixed(2)}</span>
+            <span class="breakdown-count">(${data.count} items)</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('expense-breakdown').innerHTML = breakdownHtml || '<p class="empty-state">No expenses this week.</p>';
+
+      // Insights
+      const insightsHtml = insights.map(insight => `<p class="insight-item">${insight}</p>`).join('');
+      document.getElementById('insights-list').innerHTML = insightsHtml;
+    }
+
+    /**
+     * Navigate to previous week
+     */
+    function goToPreviousWeek() {
+      currentReportDate.setDate(currentReportDate.getDate() - 7);
+      renderWeeklyReport();
+    }
+
+    /**
+     * Navigate to next week
+     */
+    function goToNextWeek() {
+      currentReportDate.setDate(currentReportDate.getDate() + 7);
+      renderWeeklyReport();
+    }
+
+    /**
+     * Export weekly report as JSON
+     */
+    function exportWeeklyReport() {
+      const weekStart = getWeekStart(currentReportDate);
+      const weekEnd = getWeekEnd(currentReportDate);
+      const stats = getWeeklyStats(weekStart, weekEnd);
+      const insights = generateInsights(stats);
+
+      const report = {
+        weekStart: formatDateISO(weekStart),
+        weekEnd: formatDateISO(weekEnd),
+        stats: {
+          tasksCompleted: stats.completedThisWeek,
+          tasksPending: stats.pendingThisWeek,
+          tasksSkipped: stats.skippedThisWeek,
+          totalTasks: stats.totalThisWeek,
+          completionPercentage: stats.totalThisWeek > 0 ? Math.round((stats.completedThisWeek / stats.totalThisWeek) * 100) : 0,
+          totalSpent: stats.totalSpent,
+          dailyAverage: Math.round(stats.totalSpent / 7),
+          weeklyBudget: (appState.settings?.dailyBudget || 1000) * 7
+        },
+        categoryBreakdown: stats.categoryBreakdown,
+        insights: insights,
+        dailyData: stats.dailyData,
+        exportedAt: new Date().toISOString()
+      };
+
+      const jsonStr = JSON.stringify(report, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `weekly-report-${formatDateISO(weekStart)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Report exported!', 'success');
+    }
+
+    /**
+     * Router with page rendering
+     */
+    const router = {
+      show(pageName) {
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+          page.classList.remove('active');
+        });
+
+        // Show selected page
+        const pageEl = document.getElementById(`page-${pageName}`);
+        if (pageEl) {
+          pageEl.classList.add('active');
+        }
+
+        // Update nav
+        document.querySelectorAll('.nav-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        const navBtn = document.getElementById(`nav-${pageName}`);
+        if (navBtn) {
+          navBtn.classList.add('active');
+        }
+
+        // Render page-specific content
+        switch(pageName) {
+          case 'home':
+            updateHomeStats();
+            break;
+          case 'routine':
+            renderTasks();
+            break;
+          case 'budget':
+            updateBudgetStats();
+            break;
+          case 'progress':
+            updateProgressStats();
+            break;
+          case 'reports':
+            renderWeeklyReport();
+            break;
+        }
+      }
+    };
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => app.init());
+  </script>
+
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .form-group {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      padding: 20px;
+      border-top: 1px solid #eee;
+      justify-content: flex-end;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+      font-style: italic;
+    }
+
+    .task-actions,
+    .expense-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn-tiny {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .task-card {
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #f9f9f9;
+    }
+
+    .task-card.completed {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+
+    .expense-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #f9f9f9;
+    }
+
+    @media (max-width: 640px) {
+      .modal-content {
+        width: 95%;
+        max-height: 80vh;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+      }
+
+      .expense-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .expense-actions {
+        width: 100%;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    [data-page="dark"] {
+      color-scheme: dark;
+    }
+  </style>
+</body>
+</html>
